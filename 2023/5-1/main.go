@@ -67,9 +67,9 @@ func main() {
 		location := lookup(humidity, almanac.maps[6])
 
 		locations = append(locations, location)
-    
-    fmt.Printf("seed: %d, location: %d", seed, location)
-    fmt.Println()
+
+		fmt.Printf("seed: %d, location: %d", seed, location)
+		fmt.Println()
 	}
 
 	sort.Ints(locations)
