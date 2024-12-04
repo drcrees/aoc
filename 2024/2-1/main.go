@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"log"
 	"os"
-  "strconv"
-  "strings"
-  "time"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func main() {
-  now := time.Now()
-  defer func() {
-    fmt.Printf("in %s\n", time.Now().Sub(now))
-  }()
+	now := time.Now()
+	defer func() {
+		fmt.Printf("in %s\n", time.Now().Sub(now))
+	}()
 
 	fmt.Println("--- 2-1 ---")
 
@@ -28,9 +28,9 @@ func main() {
 
 	var result int = 0
 	for scanner.Scan() {
-    if parse(scanner.Text()) {
-      result++
-    }
+		if parse(scanner.Text()) {
+			result++
+		}
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -41,28 +41,28 @@ func main() {
 }
 
 func parse(str string) bool {
-  numStrs := strings.Split(str, " ")
+	numStrs := strings.Split(str, " ")
 
-  return IsSafe(numStrs, 0, 0, false)
+	return IsSafe(numStrs, 0, 0, false)
 }
 
 func IsSafe(numStrs []string, index int, dir int, isSafe bool) bool {
-  if index == len(numStrs) - 1 {
-    return isSafe
-  }
+	if index == len(numStrs)-1 {
+		return isSafe
+	}
 
-  n1, _ := strconv.Atoi(numStrs[index])
-  n2, _ := strconv.Atoi(numStrs[index + 1]) 
+	n1, _ := strconv.Atoi(numStrs[index])
+	n2, _ := strconv.Atoi(numStrs[index+1])
 
-  diff := n1 - n2 
-  if diff == 0 || diff < -3 || diff > 3 {
-    return false
-  }
+	diff := n1 - n2
+	if diff == 0 || diff < -3 || diff > 3 {
+		return false
+	}
 
-  // change in direction
-  if (dir < 0 && diff > 0) || (dir > 0 && diff < 0){
-    return false 
-  }
+	// change in direction
+	if (dir < 0 && diff > 0) || (dir > 0 && diff < 0) {
+		return false
+	}
 
-  return IsSafe(numStrs, index+1, diff, true)
+	return IsSafe(numStrs, index+1, diff, true)
 }

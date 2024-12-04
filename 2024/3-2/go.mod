@@ -1,3 +1,3 @@
-module 1-1
+module 3-2
 
 go 1.21
