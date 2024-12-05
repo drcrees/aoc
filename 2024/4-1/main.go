@@ -8,11 +8,15 @@ import (
 	"time"
 )
 
-type Letter struct {
-	x         int
-	y         int
-	value     rune
-	direction int
+type Coords struct {
+	x int
+	y int
+}
+
+func directions() map[int]Coords {
+	return map[int]Coords{
+		0: {0, 0}, 1: {0, 1}, 2: {0, -1}, 3: {1, 0}, 4: {-1, 0}, 5: {1, 1}, 6: {1, -1}, 7: {-1, 1}, 8: {-1, -1},
+	}
 }
 
 func main() {
@@ -45,16 +49,10 @@ func main() {
 	fmt.Printf("Result: %d\n", result)
 }
 
-func whereXmas(grid [][]rune) int {
-	numRows := len(grid)
-	numCols := len(grid[0])
-
-	result := 0
-	count := 0
-	for y := 0; y < numRows; y++ {
-		for x := 0; x < numCols; x++ {
+func whereXmas(grid [][]rune) (result int) {
+	for y := 0; y < len(grid); y++ {
+		for x := 0; x < len(grid[0]); x++ {
 			if grid[y][x] == 'X' {
-				count++
 				result += isXmas(grid, x, y, 'M', 0)
 			}
 		}
@@ -63,96 +61,27 @@ func whereXmas(grid [][]rune) int {
 	return result
 }
 
-func isXmas(grid [][]rune, x int, y int, letter rune, direction int) int {
-	numRows := len(grid) - 1
-	numCols := len(grid[0]) - 1
-
-	numXmas := 0
-
-	if x-1 >= 0 && grid[y][x-1] == letter {
-		if direction == 0 {
-			numXmas += isXmas(grid, x-1, y, 'A', 1)
-		} else if direction == 1 {
-			if letter == 'S' {
-				return 1
-			}
-			numXmas += isXmas(grid, x-1, y, 'S', 1)
-		}
+func inbounds(start Coords, op Coords, bounds Coords) bool {
+	if start.x+op.x >= 0 && start.x+op.x <= bounds.x {
+		return start.y+op.y >= 0 && start.y+op.y <= bounds.y
 	}
 
-	if x+1 <= numCols && grid[y][x+1] == letter {
-		if direction == 0 {
-			numXmas += isXmas(grid, x+1, y, 'A', 2)
-		} else if direction == 2 {
-			if letter == 'S' {
-				return 1
-			}
-			numXmas += isXmas(grid, x+1, y, 'S', 2)
-		}
-	}
+	return false
+}
 
-	if y-1 >= 0 {
-		if grid[y-1][x] == letter {
-			if direction == 0 {
-				numXmas += isXmas(grid, x, y-1, 'A', 3)
-			} else if direction == 3 {
-				if letter == 'S' {
-					return 1
+func isXmas(grid [][]rune, x int, y int, letter rune, direction int) (numXmas int) {
+	for key, dir := range directions() {
+		if inbounds(Coords{x, y}, dir, Coords{len(grid) - 1, len(grid[0]) - 1}) {
+			if grid[y+dir.y][x+dir.x] == letter {
+				if direction == 0 {
+					numXmas += isXmas(grid, x+dir.x, y+dir.y, 'A', key)
 				}
-				numXmas += isXmas(grid, x, y-1, 'S', 3)
-			}
-		}
-		if x-1 >= 0 && grid[y-1][x-1] == letter {
-			if direction == 0 {
-				numXmas += isXmas(grid, x-1, y-1, 'A', 4)
-			} else if direction == 4 {
-				if letter == 'S' {
-					return 1
+				if key == direction {
+					if letter == 'S' {
+						return 1
+					}
+					numXmas += isXmas(grid, x+dir.x, y+dir.y, 'S', key)
 				}
-				numXmas += isXmas(grid, x-1, y-1, 'S', 4)
-			}
-		}
-		if x+1 <= numCols && grid[y-1][x+1] == letter {
-			if direction == 0 {
-				numXmas += isXmas(grid, x+1, y-1, 'A', 5)
-			} else if direction == 5 {
-				if letter == 'S' {
-					return 1
-				}
-				numXmas += isXmas(grid, x+1, y-1, 'S', 5)
-			}
-		}
-	}
-
-	if y+1 <= numRows {
-		if grid[y+1][x] == letter {
-			if direction == 0 {
-				numXmas += isXmas(grid, x, y+1, 'A', 6)
-			} else if direction == 6 {
-				if letter == 'S' {
-					return 1
-				}
-				numXmas += isXmas(grid, x, y+1, 'S', 6)
-			}
-		}
-		if x-1 >= 0 && grid[y+1][x-1] == letter {
-			if direction == 0 {
-				numXmas += isXmas(grid, x-1, y+1, 'A', 7)
-			} else if direction == 7 {
-				if letter == 'S' {
-					return 1
-				}
-				numXmas += isXmas(grid, x-1, y+1, 'S', 7)
-			}
-		}
-		if x+1 <= numCols && grid[y+1][x+1] == letter {
-			if direction == 0 {
-				numXmas += isXmas(grid, x+1, y+1, 'A', 8)
-			} else if direction == 8 {
-				if letter == 'S' {
-					return 1
-				}
-				numXmas += isXmas(grid, x+1, y+1, 'S', 8)
 			}
 		}
 	}

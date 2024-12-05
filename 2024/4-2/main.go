@@ -8,12 +8,18 @@ import (
 	"time"
 )
 
-type Coord struct {
+type Coords struct {
 	x int
 	y int
 }
 
-var xmap map[Coord]int
+var xmap map[Coords]int
+
+func directions() map[int]Coords {
+	return map[int]Coords{
+		0: {0, 0}, 1: {1, 1}, 2: {1, -1}, 3: {-1, 1}, 4: {-1, -1},
+	}
+}
 
 func main() {
 	now := time.Now()
@@ -33,7 +39,7 @@ func main() {
 
 	var result int = 0
 	var grid [][]rune
-	xmap = make(map[Coord]int)
+	xmap = make(map[Coords]int)
 
 	for scanner.Scan() {
 		grid = append(grid, []rune(scanner.Text()))
@@ -47,16 +53,10 @@ func main() {
 	fmt.Printf("Result: %d\n", result)
 }
 
-func whereXmas(grid [][]rune) int {
-	numRows := len(grid)
-	numCols := len(grid[0])
-
-	result := 0
-	count := 0
-	for y := 0; y < numRows; y++ {
-		for x := 0; x < numCols; x++ {
+func whereXmas(grid [][]rune) (result int) {
+	for y := 0; y < len(grid); y++ {
+		for x := 0; x < len(grid[0]); x++ {
 			if grid[y][x] == 'M' {
-				count++
 				isXmas(grid, x, y, 'A', 0)
 			}
 		}
@@ -71,55 +71,26 @@ func whereXmas(grid [][]rune) int {
 	return result
 }
 
-func isXmas(grid [][]rune, x int, y int, letter rune, direction int) bool {
-	numRows := len(grid) - 1
-	numCols := len(grid[0]) - 1
-
-	if y-1 >= 0 {
-		if x-1 >= 0 && grid[y-1][x-1] == letter {
-			if direction == 0 {
-				if isXmas(grid, x-1, y-1, 'S', 4) {
-					xmap[Coord{x - 1, y - 1}]++
-				}
-			} else if direction == 4 {
-				if letter == 'S' {
-					return true
-				}
-			}
-		}
-		if x+1 <= numCols && grid[y-1][x+1] == letter {
-			if direction == 0 {
-				if isXmas(grid, x+1, y-1, 'S', 5) {
-					xmap[Coord{x + 1, y - 1}]++
-				}
-			} else if direction == 5 {
-				if letter == 'S' {
-					return true
-				}
-			}
-		}
+func inbounds(start Coords, op Coords, bounds Coords) bool {
+	if start.x+op.x >= 0 && start.x+op.x <= bounds.x {
+		return start.y+op.y >= 0 && start.y+op.y <= bounds.y
 	}
 
-	if y+1 <= numRows {
-		if x-1 >= 0 && grid[y+1][x-1] == letter {
-			if direction == 0 {
-				if isXmas(grid, x-1, y+1, 'S', 7) {
-					xmap[Coord{x - 1, y + 1}]++
+	return false
+}
+
+func isXmas(grid [][]rune, x int, y int, letter rune, direction int) bool {
+	for key, dir := range directions() {
+		if inbounds(Coords{x, y}, dir, Coords{len(grid) - 1, len(grid[0]) - 1}) {
+			if grid[y+dir.y][x+dir.x] == letter {
+				if direction == 0 && isXmas(grid, x+dir.x, y+dir.y, 'S', key) {
+					xmap[Coords{x + dir.x, y + dir.y}]++
+					continue
 				}
-			} else if direction == 7 {
-				if letter == 'S' {
-					return true
-				}
-			}
-		}
-		if x+1 <= numCols && grid[y+1][x+1] == letter {
-			if direction == 0 {
-				if isXmas(grid, x+1, y+1, 'S', 8) {
-					xmap[Coord{x + 1, y + 1}]++
-				}
-			} else if direction == 8 {
-				if letter == 'S' {
-					return true
+				if key == direction {
+					if letter == 'S' {
+						return true
+					}
 				}
 			}
 		}
