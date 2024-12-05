@@ -1,11 +1,9 @@
-package main
+package p2
 
 import (
-	"bufio"
 	"fmt"
-	"log"
-	"os"
-	"time"
+
+	"github.com/drcrees/aoc/helpers"
 )
 
 type Coords struct {
@@ -21,43 +19,21 @@ func directions() map[int]Coords {
 	}
 }
 
-func main() {
-	now := time.Now()
-	defer func() {
-		fmt.Printf("in %s\n", time.Now().Sub(now))
-	}()
-
+func Solve() {
 	fmt.Println("--- 4-2 ---")
+	grid := helpers.ReadRunes("./2024/04/p2/input")
 
-	file, err := os.Open("./input")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-
-	var result int = 0
-	var grid [][]rune
-	xmap = make(map[Coords]int)
-
-	for scanner.Scan() {
-		grid = append(grid, []rune(scanner.Text()))
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
-
-	result = whereXmas(grid)
+	result := whereXmas(grid)
 	fmt.Printf("Result: %d\n", result)
 }
 
 func whereXmas(grid [][]rune) (result int) {
+	xmap := make(map[Coords]int)
+
 	for y := 0; y < len(grid); y++ {
 		for x := 0; x < len(grid[0]); x++ {
 			if grid[y][x] == 'M' {
-				isXmas(grid, x, y, 'A', 0)
+				isXmas(grid, xmap, x, y, 'A', 0)
 			}
 		}
 	}
@@ -79,11 +55,11 @@ func inbounds(start Coords, op Coords, bounds Coords) bool {
 	return false
 }
 
-func isXmas(grid [][]rune, x int, y int, letter rune, direction int) bool {
+func isXmas(grid [][]rune, xmap map[Coords]int, x int, y int, letter rune, direction int) bool {
 	for key, dir := range directions() {
 		if inbounds(Coords{x, y}, dir, Coords{len(grid) - 1, len(grid[0]) - 1}) {
 			if grid[y+dir.y][x+dir.x] == letter {
-				if direction == 0 && isXmas(grid, x+dir.x, y+dir.y, 'S', key) {
+				if direction == 0 && isXmas(grid, xmap, x+dir.x, y+dir.y, 'S', key) {
 					xmap[Coords{x + dir.x, y + dir.y}]++
 					continue
 				}

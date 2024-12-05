@@ -1,11 +1,8 @@
-package main
+package p1
 
 import (
-	"bufio"
 	"fmt"
-	"log"
-	"os"
-	"time"
+	"github.com/drcrees/aoc/helpers"
 )
 
 type Coords struct {
@@ -19,33 +16,11 @@ func directions() map[int]Coords {
 	}
 }
 
-func main() {
-	now := time.Now()
-	defer func() {
-		fmt.Printf("in %s\n", time.Now().Sub(now))
-	}()
-
+func Solve() {
 	fmt.Println("--- 4-1 ---")
+	grid := helpers.ReadRunes("./2024/04/p1/input")
 
-	file, err := os.Open("./input")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-
-	var result int = 0
-	var grid [][]rune
-	for scanner.Scan() {
-		grid = append(grid, []rune(scanner.Text()))
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
-
-	result = whereXmas(grid)
+	result := whereXmas(grid)
 	fmt.Printf("Result: %d\n", result)
 }
 

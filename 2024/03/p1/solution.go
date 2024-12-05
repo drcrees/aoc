@@ -1,31 +1,21 @@
-package main
+package p1
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"strconv"
-	"time"
+
+	"github.com/drcrees/aoc/helpers"
 )
 
-func main() {
-	now := time.Now()
-	defer func() {
-		fmt.Printf("in %s\n", time.Now().Sub(now))
-	}()
-
+func Solve() {
 	fmt.Println("--- 3-1 ---")
+	str := helpers.ReadFile("./2024/03/p1/input")
 
-	result := 0
-	b, err := os.ReadFile("./input")
-	if err != nil {
-		fmt.Print(err)
-	}
-
-	str := string(b)
 	r := regexp.MustCompile("mul\\((\\d+),(\\d+)\\)")
 	matches := r.FindAllStringSubmatch(str, -1)
 
+	result := 0
 	for _, match := range matches {
 		v1, _ := strconv.Atoi(match[1])
 		v2, _ := strconv.Atoi(match[2])

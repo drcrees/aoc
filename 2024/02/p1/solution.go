@@ -1,49 +1,24 @@
-package main
+package p1
 
 import (
-	"bufio"
 	"fmt"
-	"log"
-	"os"
 	"strconv"
-	"strings"
-	"time"
+
+	"github.com/drcrees/aoc/helpers"
 )
 
-func main() {
-	now := time.Now()
-	defer func() {
-		fmt.Printf("in %s\n", time.Now().Sub(now))
-	}()
-
+func Solve() {
 	fmt.Println("--- 2-1 ---")
+	strs := helpers.ReadDelimitedStrings("./2024/02/p1/input", " ")
 
-	file, err := os.Open("./input")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-
-	var result int = 0
-	for scanner.Scan() {
-		if parse(scanner.Text()) {
+	result := 0
+	for _, numStrs := range strs {
+		if IsSafe(numStrs, 0, 0, false) {
 			result++
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
-
 	fmt.Printf("Result: %d\n", result)
-}
-
-func parse(str string) bool {
-	numStrs := strings.Split(str, " ")
-
-	return IsSafe(numStrs, 0, 0, false)
 }
 
 func IsSafe(numStrs []string, index int, dir int, isSafe bool) bool {
