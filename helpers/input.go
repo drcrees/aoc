@@ -49,6 +49,27 @@ func ReadDelimitedStrings(filePath string, delimiter string) [][]string {
 	return strs
 }
 
+func ReadInts(filePath string) [][]int {
+	file, err := os.Open(filePath)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	var nums [][]int
+	for scanner.Scan() {
+		var line []int
+		for _, r := range scanner.Text() {
+			line = append(line, int(r-'0'))
+		}
+		nums = append(nums, line)
+	}
+
+	return nums
+}
+
 func ReadRunes(filePath string) [][]rune {
 	file, err := os.Open(filePath)
 	if err != nil {
