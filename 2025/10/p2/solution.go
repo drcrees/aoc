@@ -3,18 +3,19 @@ package p2
 import (
 	"fmt"
 	"regexp"
-	"sort"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/drcrees/aoc/helpers"
+
+	"github.com/draffensperger/golp"
 )
 
 type Machine struct {
 	id       int
 	config   uint
-	buttons  []uint
-	buttons2 []Button
+	buttons  []Button
 	joltages []uint
 }
 
@@ -30,42 +31,35 @@ func Solve() {
 
 	var result int
 	for _, m := range machines {
-		fmt.Println(m)
+		lp := golp.NewLP(0, len(m.buttons))
+
+		objective := make([]float64, len(m.buttons))
+
+		for i := 0; i < len(m.buttons); i++ {
+			objective[i] = 1.0
+			lp.SetInt(i, true)
+		}
+
+		lp.SetObjFn(objective)
+
+		for i := 0; i < len(m.joltages); i++ {
+			var entries []golp.Entry
+			for j, b := range m.buttons {
+				if slices.Contains(b.indices, uint(i)) {
+					entries = append(entries, golp.Entry{Col: j, Val: 1.0})
+				}
+			}
+			lp.AddConstraintSparse(entries, golp.EQ, float64(m.joltages[i]))
+		}
+
+		lp.Solve()
+
+		for _, v := range lp.Variables() {
+			result += int(v)
+		}
 	}
 
 	fmt.Printf("Result: %d\n", result)
-}
-
-func fewestPresses(m Machine) int {
-	c := combos(m.buttons)
-
-	for _, subset := range c {
-		var value uint
-		for _, button := range subset {
-			value ^= button
-		}
-		if value == m.config {
-			return len(subset)
-		}
-	}
-	return 0
-}
-
-func combos(buttons []uint) (subsets [][]uint) {
-	length := uint(len(buttons))
-	for subsetBits := 1; subsetBits < (1 << length); subsetBits++ {
-		var subset []uint
-		for object := range length {
-			if (subsetBits>>object)&1 == 1 {
-				subset = append(subset, buttons[object])
-			}
-		}
-		subsets = append(subsets, subset)
-	}
-	sort.Slice(subsets, func(a, b int) bool {
-		return len(subsets[a]) < len(subsets[b])
-	})
-	return subsets
 }
 
 func parseMachines(strs []string) []Machine {
@@ -86,18 +80,14 @@ func parseMachines(strs []string) []Machine {
 			}
 		}
 
-		var buttons []uint
-		var buttons2 []Button
+		var buttons []Button
 		for _, bs := range s2 {
-			var button uint
 			var indices []uint
 			for _, s := range strings.Split(bs[1:len(bs)-1], ",") {
 				v, _ := strconv.Atoi(s)
-				button ^= (1 << v)
 				indices = append(indices, uint(v))
 			}
-			buttons = append(buttons, button)
-			buttons2 = append(buttons2, Button{indices})
+			buttons = append(buttons, Button{indices})
 		}
 
 		var joltages []uint
@@ -105,7 +95,7 @@ func parseMachines(strs []string) []Machine {
 			v, _ := strconv.Atoi(s)
 			joltages = append(joltages, uint(v))
 		}
-		machines = append(machines, Machine{i + 1, config, buttons, buttons2, joltages})
+		machines = append(machines, Machine{i + 1, config, buttons, joltages})
 	}
 
 	return machines
